@@ -3,6 +3,7 @@ import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/components/theme-provider"
+import TopBar from "@/components/top-bar";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin", "cyrillic"],
@@ -29,7 +30,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-        <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            <TopBar />
+            {children}
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
