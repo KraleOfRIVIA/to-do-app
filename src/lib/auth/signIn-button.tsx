@@ -6,8 +6,8 @@ import { FaGithub } from "react-icons/fa";
 import { signIn } from "next-auth/react"
 
 const providerIcons: Record<string, React.ReactNode> = {
-    github: <FaGithub className="w-5 h-5 text-white" />,
-    google: <FaGoogle className="w-5 h-5 text-white" />,
+    github: <FaGithub className="w-5 h-5 text-foreground" />,
+    google: <FaGoogle className="w-5 h-5 text-foreground" />,
 };
 
 type AuthProvider = "github" | "google" | string;
