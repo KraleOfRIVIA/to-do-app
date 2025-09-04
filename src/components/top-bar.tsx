@@ -2,9 +2,9 @@
 import React from "react";
 import { Calendar02 } from "./calendar-02";
 import { Search } from 'lucide-react';
-import { Bell } from 'lucide-react';
 import { ModeToggle } from "./theme-toggle";
 import { useSession } from "next-auth/react";
+import { NotificationList } from "./notifications/notification-list";
 
 export const TopBar: React.FC = () => {
     const { status } = useSession();
@@ -38,13 +38,7 @@ export const TopBar: React.FC = () => {
 
             {/* Icons & Date */}
             <div className="flex items-center gap-4">
-            <button
-                className="bg-primary border-none rounded-lg w-9 h-9 flex items-center justify-center cursor-pointer"
-            >
-                <span role="img" aria-label="notification" className="text-white text-lg">
-                <Bell className="h-5 w-5" />
-                </span>
-            </button>
+                <NotificationList />
             </div>
             <div className="flex items-center gap-4 ml-4">
             <Calendar02 />

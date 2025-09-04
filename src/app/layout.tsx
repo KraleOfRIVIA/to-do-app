@@ -4,6 +4,8 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/components/theme-provider"
 import TopBar from "@/components/top-bar";
+import { Toaster } from "@/components/ui/sonner";
+import { TaskDeadlineWatcher } from "@/components/notifications/notification";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin", "cyrillic"],
@@ -32,6 +34,8 @@ export default function RootLayout({
           >
           <SessionProvider>
             <TopBar />
+            <Toaster />
+            <TaskDeadlineWatcher />
             {children}
           </SessionProvider>
         </ThemeProvider>
