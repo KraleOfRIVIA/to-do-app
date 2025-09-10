@@ -10,10 +10,10 @@ export const TopBar: React.FC = () => {
     const { status } = useSession();
 
   if (status !== "authenticated") {
-    return null; // 🚫 не авторизован — не показываем
+    return null;
   }
     return (
-        <div className="flex items-center px-10 py-6 bg-card shadow-[0_2px_16px_rgba(0,0,0,0.2)] justify-between">
+        <div className="flex items-center px-10 py-5 bg-card shadow-[0_2px_16px_rgba(0,0,0,0.2)] justify-between">
             {/* Logo */}
             <div className="text-[28px] font-bold">
             <span className="text-primary">TO</span>
