@@ -1,8 +1,8 @@
 "use client"
 import React from "react";
-import { Calendar02 } from "./calendar-02";
+import { Calendar02 } from "./calendar/calendar";
 import { Search } from 'lucide-react';
-import { ModeToggle } from "./theme-toggle";
+import { ModeToggle } from "./theme/theme-toggle";
 import { useSession } from "next-auth/react";
 import { NotificationList } from "./notifications/notification-list";
 

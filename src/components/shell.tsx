@@ -12,12 +12,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-1 rounded-radius-lg">
         {/* Sidebar фиксированный слева */}
-        <div className="lg:flex fixed mt-15">
+        <div className="lg:flex fixed mt-15 ">
           <AppSidebar />
         </div>
 
         {/* Контент с отступом слева (чтобы не наезжать на сайдбар) */}
-        <main className="flex-1 ml-[280px] p-10">
+        <main className="flex-1 ml-[280px] p-10 m-5">
           {children}
         </main>
       </div>
