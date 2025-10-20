@@ -1,15 +1,28 @@
 import { FaCheckSquare } from "react-icons/fa";
 import Image from "next/image";
 
-interface CompletedTask {
+interface Task {
   title: string;
   description: string;
   image: string;
-  completedAgo: string; // например: "2 days ago"
+  date?: string | null
+}
+
+function formatCompletedAgo(date: string | null) {
+  if (!date) return "unknown date"
+
+  const now = new Date()
+  const diffMs = now.getTime() - new Date(date).getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return "today"
+  if (diffDays === 1) return "1 day ago"
+  return `${diffDays} days ago`
 }
 
 interface CompletedTasksProps {
-  tasks: CompletedTask[];
+  tasks: Task[];
+  
 }
 
 export function CompletedTasks({ tasks }: CompletedTasksProps) {
@@ -36,7 +49,7 @@ export function CompletedTasks({ tasks }: CompletedTasksProps) {
               <div className="text-xs">
                 <span className="text-green-600 font-medium">Status: Completed</span>
               </div>
-              <div className="text-xs text-gray-400">Completed {task.completedAgo}.</div>
+              <div className="text-xs text-gray-400">Completed {formatCompletedAgo(task.date ?? null)}.</div>
             </div>
             {/* Картинка */}
             <div className="ml-3 flex-shrink-0">

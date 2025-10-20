@@ -1,60 +1,54 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import Task from "@/types/ITask";
+import { CebabButton } from "./cebab-button";
+import { TaskView } from "./task-view";
+type TaskCardProps = {
+  task: Task;
+  onClick?: () => void;
+};
 
-type TaskStatus = "Not Started" | "In Progress" | "Completed";
-
-interface TaskCardProps {
-  title: string;
-  description: string;
-  priority: "Low" | "Moderate" | "High" | "Extreme";
-  status: TaskStatus;
-  createdAt: string;
-  image?: string;
-  selected?: boolean; // активная карточка
-  onClick?: () => void; // обработчик клика
-}
-
-const statusColors: Record<TaskStatus, string> = {
+const statusColors = {
   "Not Started": "text-red-500",
   "In Progress": "text-blue-500",
   "Completed": "text-green-500",
-};
+} as const;
 
-const priorityColors: Record<TaskCardProps["priority"], string> = {
+const priorityColors = {
   Low: "text-gray-500",
   Moderate: "text-blue-400",
   High: "text-orange-500",
   Extreme: "text-red-600 font-bold",
-};
+} as const;
 
-export function TaskCard({
-  title,
-  description,
-  priority,
-  status,
-  createdAt,
-  image,
-  selected,
-  onClick,
-}: TaskCardProps) {
+export function TaskCard({ task,onClick}: TaskCardProps) {
+  // ✅ Деструктурируем поля из задачи
+  const { title, description, priority, status, createdAt, image } = task;
+
+  const formattedDate = createdAt
+    ? new Intl.DateTimeFormat("ru-RU", {
+        weekday: "long",
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+      }).format(new Date(createdAt))
+    : "—";
+
   return (
     <Card
-      onClick={onClick}
       className={cn(
-        "p-3 rounded-xl shadow-md transition border cursor-pointer",
-        selected
-          ? "bg-primary/10 border-primary"
-          : "bg-card hover:shadow-lg border-border"
+        "p-3 rounded-xl shadow-md transition border cursor-pointer bg-card hover:shadow-lg border-border"
       )}
+      onClick={onClick}
     >
-      <CardContent className="flex flex-row items-start gap-4 p-0">
+      <CardContent className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-0">
         {/* Индикатор статуса */}
-        <div className="flex flex-col items-center pt-1">
+        <div className="flex flex-row sm:flex-col items-center gap-2 pt-1">
           <span
             className={cn(
               "inline-block w-3 h-3 rounded-full border-2 border-current",
-              statusColors[status]
+              statusColors[status as keyof typeof statusColors]
             )}
             title={status}
           />
@@ -62,33 +56,45 @@ export function TaskCard({
 
         {/* Контент */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-base mb-1">{title}</h3>
+          <TaskView task={task} />
           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-            {description}
+            {description || "No description"}
           </p>
-          <div className="flex gap-3 flex-wrap text-xs items-center">
-            <span className={cn(priorityColors[priority], "font-medium")}>
+
+          <div className="flex flex-wrap gap-2 text-xs items-center">
+            <span
+              className={cn(
+                priorityColors[priority as keyof typeof priorityColors],
+                "font-medium"
+              )}
+            >
               Priority: {priority}
             </span>
-            <span className={cn(statusColors[status], "font-medium")}>
+            <span
+              className={cn(
+                statusColors[status as keyof typeof statusColors],
+                "font-medium"
+              )}
+            >
               Status: {status}
             </span>
-            <span className="text-gray-400">Created: {createdAt}</span>
+            <span className="text-gray-400">{formattedDate}</span>
           </div>
         </div>
 
         {/* Картинка */}
         {image && (
-          <div className="flex-shrink-0 ml-2">
+          <div className="flex-shrink-0 sm:ml-2 w-full sm:w-auto">
             <Image
               src={image}
               alt={title}
-              className="rounded-lg object-cover"
+              className="rounded-lg object-cover w-full sm:w-[64px] h-[120px] sm:h-[64px]"
               width={64}
               height={64}
             />
           </div>
         )}
+        <CebabButton task={task}/>
       </CardContent>
     </Card>
   );

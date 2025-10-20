@@ -11,8 +11,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'static.wikia.nocookie.net',
-        pathname: '/**',
+        hostname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'davclqdehodgwdwhvtel.supabase.co',
+        pathname: '/storage/v1/object/public/**',
       },
     ],
   },

@@ -2,7 +2,7 @@ import SignInButton from "@/lib/auth/signIn-button";
 import { FaUser } from "react-icons/fa";
 import { FaLock } from "react-icons/fa";
 import Image from 'next/image'
-import { ModeToggle } from "@/components/theme-toggle";
+import { ModeToggle } from "@/components/theme/theme-toggle";
 
 export default function AuthPage() {
   return (
