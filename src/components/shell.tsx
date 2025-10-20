@@ -1,26 +1,31 @@
-import TopBar from "@/components/top-bar"
-import AppSidebar from "@/components/app-sidebar"
+import TopBar from "@/components/top-bar";
+import AppSidebar from "@/components/app-sidebar";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* TopBar сверху */}
-      <div className="sticky top-0 z-50 w-full">
+    <div
+      className="
+        grid
+        grid-rows-[auto_1fr]
+        grid-cols-[240px_1fr]
+        min-h-screen
+        bg-background
+      "
+    >
+      {/* === Top Bar === */}
+      <header className="row-start-1 row-end-2 col-span-2 sticky top-0 z-50">
         <TopBar />
-      </div>
+      </header>
 
-      <div className="flex flex-1 rounded-radius-lg">
-        {/* Sidebar фиксированный слева */}
-        <div className="lg:flex fixed mt-15 ">
-          <AppSidebar />
-        </div>
+      {/* === Sidebar === */}
+      <aside className="row-start-2 col-start-1 col-end-2 border-r bg-sidebar mt-10">
+        <AppSidebar />
+      </aside>
 
-        {/* Контент с отступом слева (чтобы не наезжать на сайдбар) */}
-        <main className="flex-1 ml-[280px] p-10 m-5">
-          {children}
-        </main>
-      </div>
+      {/* === Content === */}
+      <main className="row-start-2 col-start-2 col-end-3 p-8 overflow-y-auto">
+        {children}
+      </main>
     </div>
-  )
+  );
 }

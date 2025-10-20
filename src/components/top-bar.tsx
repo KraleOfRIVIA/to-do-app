@@ -1,53 +1,39 @@
-"use client"
-import React from "react";
-import { Calendar02 } from "./calendar/calendar";
-import { Search } from 'lucide-react';
+"use client";
+
+import { Search } from "lucide-react";
 import { ModeToggle } from "./theme/theme-toggle";
-import { useSession } from "next-auth/react";
+import { Calendar02 } from "./calendar/calendar";
 import { NotificationList } from "./notifications/notification-list";
+import { useSession } from "next-auth/react";
 
-export const TopBar: React.FC = () => {
-    const { status } = useSession();
+export default function TopBar() {
+  const { status } = useSession();
+  if (status !== "authenticated") return null;
 
-  if (status !== "authenticated") {
-    return null;
-  }
-    return (
-        <div className="flex items-center px-10 py-5 bg-card shadow-[0_2px_16px_rgba(0,0,0,0.2)] justify-between">
-            {/* Logo */}
-            <div className="text-[28px] font-bold">
-            <span className="text-primary">TO</span>
-            <span className="text-foreground">DO</span>
-            </div>
+  return (
+    <div className="w-full bg-card shadow flex items-center justify-between px-6 py-3">
+      {/* Logo */}
+      <div className="text-2xl font-bold">
+        <span className="text-primary">TO</span>
+        <span className="text-foreground">DO</span>
+      </div>
 
-            {/* Search */}
-            <div className="flex flex-1 justify-center">
-                <div className="flex items-center bg-white rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.07)] px-2 w-[400px] h-10">
-                    <input
-                        type="text"
-                        placeholder="Search your task here..."
-                        className="border-none outline-none bg-white flex-1 text-sm px-3 text-background rounded-l-xl"
-                    />
-                    <button
-                        className="bg-primary border-none rounded-r-xl w-10 h-10 flex items-center justify-center cursor-pointer m-[-10px]"
-                    >
-                        <Search className="text-foreground " />
-                    </button>
-                </div>
-            </div>
+      {/* Search */}
+      <div className="flex items-center bg-white rounded-xl shadow px-3 w-full max-w-[400px] h-10">
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          className="flex-1 bg-transparent border-none outline-none text-sm px-2"
+        />
+        <Search className="text-foreground" size={18} />
+      </div>
 
-            {/* Icons & Date */}
-            <div className="flex items-center gap-4">
-                <NotificationList />
-            </div>
-            <div className="flex items-center gap-4 ml-4">
-            <Calendar02 />
-            </div>
-            <div className="flex items-center gap-4 ml-4">
-                <ModeToggle />
-            </div>
-        </div>
-    );
-};
-
-export default TopBar
+      {/* Actions */}
+      <div className="flex items-center gap-4">
+        <NotificationList />
+        <Calendar02 />
+        <ModeToggle />
+      </div>
+    </div>
+  );
+}
