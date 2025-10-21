@@ -7,7 +7,7 @@ import { useTaskStore } from "@/lib/store/task/task-store";
 import { useEffect } from "react";
 
 export default function DashboardPage() {
-    const { tasks, fetchUpcomingTasks, loading } = useTaskStore();
+    const { upcoming, fetchUpcomingTasks, loading } = useTaskStore();
     const { taskStats, fetchTaskStats, loading: statsLoading } = useTaskStore();
     const { completed, fetchCompletedTasks } = useTaskStore();
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function DashboardPage() {
             </div>
             <div className="text-gray-400 text-sm mb-4">20 June &nbsp; - &nbsp; Today</div>
             <div className="flex flex-col gap-4">
-              {Array.isArray(tasks) ? tasks.map((task) => (
+              {Array.isArray(upcoming) ? upcoming.map((task) => (
                 <TaskCard key={task.id} task={task}  />
               )) : null}
 
