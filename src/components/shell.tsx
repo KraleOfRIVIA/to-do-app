@@ -3,29 +3,20 @@ import AppSidebar from "@/components/app-sidebar";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="
-        grid
-        grid-rows-[auto_1fr]
-        grid-cols-[240px_1fr]
-        min-h-screen
-        bg-background
-      "
-    >
+    <div className="min-h-screen flex flex-col bg-background">
       {/* === Top Bar === */}
-      <header className="row-start-1 row-end-2 col-span-2 sticky top-0 z-50">
+      <header className="sticky top-0 z-50 border-b bg-background">
         <TopBar />
       </header>
 
-      {/* === Sidebar === */}
-      <aside className="row-start-2 col-start-1 col-end-2 border-r bg-sidebar mt-10">
-        <AppSidebar />
-      </aside>
+      {/* === Layout Wrapper === */}
+      <div className="flex flex-1">
+        {/* === Sidebar (desktop only) === */}
+          <AppSidebar />
 
-      {/* === Content === */}
-      <main className="row-start-2 col-start-2 col-end-3 p-8 overflow-y-auto">
-        {children}
-      </main>
+        {/* === Content === */}
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      </div>
     </div>
   );
 }

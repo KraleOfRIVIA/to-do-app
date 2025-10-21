@@ -53,13 +53,14 @@ export function CompletedTasks({ tasks }: CompletedTasksProps) {
             </div>
             {/* Картинка */}
             <div className="ml-3 flex-shrink-0">
-              <Image
-                src={task.image}
-                alt={task.title}
-                width={64}
-                height={64}
-                className="rounded-lg object-cover"
-              />
+              {task.image && (
+                <Image
+                  src={task.image}
+                  alt={task.title}
+                  width={64}
+                  height={64}
+                />
+              )}
             </div>
           </div>
         ))}
