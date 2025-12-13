@@ -7,47 +7,68 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {useTaskStore } from "@/lib/store/task/task-store";
+import { useUpdateTask } from "@/hooks/useTasks";
 import Task from "@/types/ITask";
+import { toast } from "sonner";
 
 type EditTaskDialogProps = {
   task: Task;
 };
 
-export function EditTaskDialog({task}: EditTaskDialogProps) {
-    const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const updateTask = useTaskStore((s) => s.updateTask);
+type FormData = {
+  title: string;
+  date: string;
+  priority: "Low" | "Moderate" | "High";
+  description?: string;
+  status: "Not Started" | "In Progress" | "Completed";
+};
 
-  const [title, setTitle] = useState(task.title);
-  const [date, setDate] = useState(task.date);
-  const [priority, setPriority] = useState<"Low" | "Moderate" | "High">(task.priority);
-  const [description, setDescription] = useState(task.description);
-  const [status, setStatus] = useState<"Not Started" | "In Progress" | "Completed">(task.status);
+export function EditTaskDialog({task}: EditTaskDialogProps) {
+  const [open, setOpen] = useState(false);
+  const updateTaskMutation = useUpdateTask();
+
+  const [formData, setFormData] = useState<FormData>({
+    title: task.title,
+    date: task.date || "",
+    priority: task.priority,
+    description: task.description,
+    status: task.status,
+  });
 
   useEffect(() => {
-    if (task) {
-      setTitle(task.title);
-      setDate(task.date);
-      setPriority(task.priority);
-      setDescription(task.description);
-    }
+    setFormData({
+      title: task.title,
+      date: task.date || "",
+      priority: task.priority,
+      description: task.description,
+      status: task.status,
+    });
   }, [task]);
+
+  const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
 
-    await updateTask(task.id, {
-      title,
-      date,
-      priority,
-      description,
-      status,
-    });
-
-    setLoading(false);
-    setOpen(false);
+    try {
+      await updateTaskMutation.mutateAsync({
+        taskId: task.id,
+        updates: {
+          title: formData.title,
+          date: formData.date || undefined,
+          priority: formData.priority,
+          description: formData.description,
+          status: formData.status,
+        },
+      });
+      setOpen(false);
+      toast.success("Task updated successfully");
+    } catch (error) {
+      toast.error("Failed to update task");
+      console.error("Failed to update task:", error);
+    }
   }
 
   return (
@@ -75,8 +96,8 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
             <Input
               id="title"
               name="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={formData.title}
+              onChange={(e) => updateField("title", e.target.value)}
               required
             />
           </div>
@@ -88,8 +109,8 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
               type="date"
               id="date"
               name="date"
-              value={date || ""}
-              onChange={(e) => setDate(e.target.value)}
+              value={formData.date || ""}
+              onChange={(e) => updateField("date", e.target.value)}
             />
           </div>
 
@@ -98,8 +119,8 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
             <Label>Priority</Label>
             <RadioGroup
               name="priority"
-              value={priority}
-              onValueChange={(val) => setPriority(val as "Low" | "Moderate" | "High")}
+              value={formData.priority}
+              onValueChange={(val) => updateField("priority", val as "Low" | "Moderate" | "High")}
               className="flex gap-6 mt-2"
             >
               <div className="flex items-center gap-1">
@@ -127,8 +148,8 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
               id="description"
               name="description"
               rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={formData.description || ""}
+              onChange={(e) => updateField("description", e.target.value)}
               placeholder="Start writing here..."
             />
           </div>
@@ -136,11 +157,10 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
           <div>
             <Label>Status</Label>
             <RadioGroup
-
               name="status"
-              value={status}
+              value={formData.status}
               className="flex gap-6 mt-2"
-              onValueChange={(val) => setStatus(val as "Not Started" | "In Progress" | "Completed")}
+              onValueChange={(val) => updateField("status", val as "Not Started" | "In Progress" | "Completed")}
             >
               <div className="flex items-center gap-1">
                 <RadioGroupItem value="Not Started" id="not-started" />
@@ -157,8 +177,8 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
             </RadioGroup>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Saving..." : "Done"}
+          <Button type="submit" className="w-full" disabled={updateTaskMutation.isPending}>
+            {updateTaskMutation.isPending ? "Saving..." : "Done"}
           </Button>
         </form>
       </DialogContent>

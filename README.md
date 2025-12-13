@@ -1,36 +1,142 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Task Manager App
 
-## Getting Started
+Современное веб-приложение для управления задачами с авторизацией, статистикой и фильтрацией.  
+Создано с использованием **Next.js 15**, **TypeScript**, **Prisma** и **Zustand**.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Технологии
+
+| Технология | Описание |
+|-------------|-----------|
+| **Next.js 15 (App Router)** | Серверный рендеринг, маршрутизация и API-роуты |
+| **TypeScript** | Статическая типизация |
+| **Prisma ORM** | Работа с базой данных PostgreSQL |
+| **NextAuth.js (auth.js)** | Авторизация пользователей |
+| **Zustand** | Управление состоянием клиента |
+| **Tailwind CSS** | Стилизация и адаптивный интерфейс |
+| **shadcn/ui** | Готовые UI-компоненты |
+| **Lucide Icons** | Иконки |
+| **Framer Motion** | Анимации |
+
+---
+
+## Структура страниц
+
+| Страница | Путь | Описание |
+|-----------|------|-----------|
+| **Главная (Dashboard)** | `/` | Отображает краткую сводку задач (активные, завершённые, статистика) |
+| **Все задачи** | `/tasks` | Список всех задач пользователя с поиском и фильтрацией |
+| **Завершённые задачи** | `/tasks/completed` | Задачи, выполненные за последние 7 дней |
+| **Предстоящие задачи** | `/tasks/upcoming` | Задачи, дата которых в будущем |
+| **Профиль (если есть)** | `/profile` | Данные пользователя, возможность выйти из аккаунта |
+| **API маршруты** | `/api/tasks/*` | CRUD-операции и фильтры для задач |
+
+---
+
+## Основной функционал
+
+### Работа с задачами
+- Добавление новой задачи (заголовок, описание, дата, приоритет, изображение)
+- Редактирование существующих задач
+- Удаление задач
+- Изменение статуса (Not Started / In Progress / Completed)
+- Сортировка и фильтрация по дате, статусу и приоритету
+
+### Категории задач
+- **Upcoming** — задачи с датой в будущем  
+- **Completed** — задачи, завершённые за последние 7 дней  
+- **All Tasks** — все задачи пользователя
+
+### Поиск
+- Поиск по заголовку и описанию задач (через Zustand store)
+
+### Статистика
+- Подсчёт количества задач по статусам:
+  - Completed
+  - In Progress
+  - Not Started
+
+### Кэширование
+- Все запросы к API кэшируются в Zustand (в том числе пустые результаты)
+- Повторные запросы не отправляются чаще чем раз в 2 минуты
+
+### Авторизация
+- Через **NextAuth** (`/api/auth`)
+- Только авторизованные пользователи могут обращаться к API задач
+
+---
+
+## Структура проекта (основная)
+
+```
+src/
+├── app/
+│ ├── page.tsx # Главная страница
+│ ├── tasks/
+│ │ ├── page.tsx # Список всех задач
+│ │ ├── completed/page.tsx # Завершённые задачи
+│ │ └── upcoming/page.tsx # Предстоящие задачи
+│ └── api/
+│ └── tasks/
+│ ├── route.ts # CRUD API
+│ ├── completed/route.ts
+│ ├── upcoming/route.ts
+│ └── status/route.ts
+├── lib/
+│ ├── prisma.ts # Инициализация Prisma
+│ └── utils.ts # Вспомогательные функции
+├── store/
+│ └── taskStore.ts # Zustand store
+├── types/
+│ └── ITask.ts # Тип задачи
+├── components/
+│ ├── TaskCard.tsx # Компонент карточки задачи
+│ ├── TaskForm.tsx # Форма добавления/редактирования
+│ └── StatsCard.tsx # Компонент статистики
+└── auth/
+└── index.ts # NextAuth конфигурация
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+##  API endpoints
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Метод | URL | Описание |
+|--------|-----|----------|
+| `GET` | `/api/tasks` | Получить все задачи |
+| `GET` | `/api/tasks/upcoming` | Получить будущие задачи |
+| `GET` | `/api/tasks/completed` | Завершённые за 7 дней |
+| `GET` | `/api/tasks/status` | Статистика по статусам |
+| `POST` | `/api/tasks` | Создать новую задачу |
+| `PUT` | `/api/tasks/edit/:id` | Обновить задачу |
+| `DELETE` | `/api/tasks/:id` | Удалить задачу |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Установка и запуск
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# 1. Клонировать репозиторий
+git clone https://github.com/your-username/task-manager.git
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 2. Установить зависимости
+npm install
 
-## Deploy on Vercel
+# 3. Настроить .env
+DATABASE_URL="postgresql://..."
+NEXTAUTH_SECRET="..."
+NEXTAUTH_URL="http://localhost:3000"
+AUTH_GITHUB_ID="..."
+AUTH_GITHUB_SECRET="..."
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+# Connect supabase for storage images
+NEXT_PUBLIC_SUPABASE_URL="..."
+NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# 4. Синхронизировать Prisma
+npx prisma migrate dev
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# 5. Запустить проект
+npm run dev

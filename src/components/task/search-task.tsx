@@ -1,19 +1,27 @@
 "use client";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Search } from "lucide-react";
-import { useTaskStore } from "@/lib/store/task/task-store";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useTasksContext } from "@/components/providers/tasks-provider";
 
 export default function SearchTask() {
-  const { searchTasks, filteredTasks } = useTaskStore();
+  const { tasks } = useTasksContext();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
 
-  useEffect(() => {
-    searchTasks(debouncedQuery);
-  }, [debouncedQuery, searchTasks]);
+  const filteredTasks = useMemo(() => {
+    if (!debouncedQuery.trim()) {
+      return tasks;
+    }
+
+    return tasks.filter(
+      (t) =>
+        t.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+        t.description?.toLowerCase().includes(debouncedQuery.toLowerCase())
+    );
+  }, [debouncedQuery, tasks]);
 
   return (
     <div className="relative w-full max-w-[400px]">

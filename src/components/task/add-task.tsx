@@ -7,16 +7,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useTaskStore } from "@/lib/store/task/task-store";
+import { useAddTask } from "@/hooks/useTasks";
 import { useSession } from "next-auth/react";
 import { uploadImage } from "@/lib/supabase/upload-images";
+import { toast } from "sonner";
 
 export function AddTaskDialog() {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const addTask = useTaskStore((s) => s.addTask);
   const [file, setFile] = useState<File | null>(null);  
   const { status } = useSession();
+  const addTaskMutation = useAddTask();
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault();
 
@@ -25,8 +26,6 @@ export function AddTaskDialog() {
     return;
   }
 
-  setLoading(true);
-
   const formData = new FormData(e.currentTarget);
 
   let imageUrl: string | undefined = undefined;
@@ -34,21 +33,29 @@ export function AddTaskDialog() {
     imageUrl = await uploadImage(file);
   }
 
+  const dateValue = formData.get("date") as string;
   const task = {
     title: formData.get("title") as string,
     description: formData.get("description") as string,
-    date: formData.get("date") as string,
+    date: dateValue || undefined,
     priority: formData.get("priority") as "Low" | "Moderate" | "High",
     status: "Not Started" as const,
     image: imageUrl,
   };
 
-  await addTask(task);
-
-  setLoading(false);
-  setOpen(false);
-  setFile(null);
-  e.currentTarget.reset();
+  try {
+    await addTaskMutation.mutateAsync({
+      ...task,
+      date: task.date ?? null,
+    });
+    setOpen(false);
+    setFile(null);
+    e.currentTarget.reset();
+    toast.success("Task added successfully");
+  } catch (error) {
+    toast.error("Failed to add task");
+    console.error("Failed to add task:", error);
+  }
 }
 
 
@@ -101,8 +108,8 @@ export function AddTaskDialog() {
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Saving..." : "Done"}
+          <Button type="submit" className="w-full" disabled={addTaskMutation.isPending}>
+            {addTaskMutation.isPending ? "Saving..." : "Done"}
           </Button>
         </form>
       </DialogContent>

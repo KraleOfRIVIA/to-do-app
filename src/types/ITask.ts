@@ -5,7 +5,7 @@ type Task = {
   priority: "Low" | "Moderate" | "High";
   status: "Not Started" | "In Progress" | "Completed";
   createdAt: string;
-  date?: string;
+  date: string | null;
   image?: string;
 };
 export default Task;

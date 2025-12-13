@@ -23,6 +23,6 @@ export default auth((req) => {
 // Настройте маршруты, где должно работать Middleware
 export const config = {
   // Эта регулярка исключает: /api, /_next/static, /_next/image, /favicon.ico и т.д.
-  // Замените '/login' на ваш фактический маршрут для входа.
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth).*)"],
+  // Но включает /auth для проверки аутентификации
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
