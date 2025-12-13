@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TaskDeadlineWatcher } from "@/components/notifications/notification";
 import AppShell from "@/components/shell";
+import { QueryProvider } from "@/lib/providers/query-provider";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin", "cyrillic"],
@@ -32,14 +33,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SessionProvider>
-            <AppShell>
-              <Toaster />
-              <TaskDeadlineWatcher />
-              
-              {children}
-            </AppShell>
-          </SessionProvider>
+          <QueryProvider>
+            <SessionProvider>
+              <AppShell>
+                <Toaster />
+                <TaskDeadlineWatcher />
+                
+                {children}
+              </AppShell>
+            </SessionProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

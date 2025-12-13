@@ -61,7 +61,7 @@ export const TargetTask: React.FC<TaskFullCardProps> = ({ task }) => (
 
         {task.date && (
           <div className="mb-2 text-sm text-gray-500">
-            Deadline: {task.date}
+            Deadline: {new Date(task.date).toLocaleDateString("ru-RU")}
           </div>
         )}
 

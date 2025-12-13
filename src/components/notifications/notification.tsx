@@ -1,26 +1,35 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { toast } from "sonner"
-
-// тестовые задачи (одна с дедлайном через 30 секунд)
-const tasks = [
-  { id: 1, title: "Finish UI design", deadline: new Date(Date.now() + 30 * 1000) }, // дедлайн через 30 сек
-  { id: 2, title: "Prepare report", deadline: new Date(Date.now() + 60 * 1000) }, // дедлайн через 1 мин
-]
+import { useTasksContext } from "@/components/providers/tasks-provider"
 
 export function TaskDeadlineWatcher() {
+  const { tasks } = useTasksContext()
+  const notifiedTasksRef = useRef<Set<string>>(new Set())
+
   useEffect(() => {
+    // Сбрасываем уведомления при изменении списка задач
+    notifiedTasksRef.current.clear()
+  }, [tasks.length])
+
+  useEffect(() => {
+    if (tasks.length === 0) return
+
     const interval = setInterval(() => {
       const now = new Date()
 
       tasks.forEach((task) => {
-        const diff = task.deadline.getTime() - now.getTime()
+        if (!task.date) return
+        
+        const taskDate = new Date(task.date as string)
+        const diff = taskDate.getTime() - now.getTime()
 
-        // если меньше минуты до дедлайна
-        if (diff > 0 && diff < 60 * 1000) {
+        // Показываем уведомление только один раз для каждой задачи
+        if (diff > 0 && diff < 60 * 1000 && !notifiedTasksRef.current.has(task.id)) {
+          notifiedTasksRef.current.add(task.id)
           toast("⏰ Task reminder", {
-            description: `${task.title} is due at ${task.deadline.toLocaleTimeString()}`,
+            description: `${task.title} is due at ${taskDate.toLocaleTimeString()}`,
             action: {
               label: "Open",
               onClick: () => console.log("Go to task", task.id),
@@ -28,10 +37,10 @@ export function TaskDeadlineWatcher() {
           })
         }
       })
-    }, 60 * 1000) // проверяем каждые 60 секунд
+    }, 60 * 1000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [tasks])
 
   return null
 }

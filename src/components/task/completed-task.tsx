@@ -1,12 +1,6 @@
 import { FaCheckSquare } from "react-icons/fa";
 import Image from "next/image";
-
-interface Task {
-  title: string;
-  description: string;
-  image: string;
-  date?: string | null
-}
+import Task from "@/types/ITask";
 
 function formatCompletedAgo(date: string | null) {
   if (!date) return "unknown date"
@@ -35,7 +29,7 @@ export function CompletedTasks({ tasks }: CompletedTasksProps) {
       <div className="flex flex-col gap-4">
         {tasks.map((task) => (
           <div
-            key={task.title}
+            key={task.id}
             className="flex items-center border border-gray-200 rounded-xl p-4 bg-card"
           >
             {/* Статусный кружок */}
@@ -45,7 +39,7 @@ export function CompletedTasks({ tasks }: CompletedTasksProps) {
             {/* Контент */}
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-lg mb-1">{task.title}</div>
-              <div className="text-sm text-gray-500 mb-2">{task.description}</div>
+              <div className="text-sm text-gray-500 mb-2">{task.description || "No description"}</div>
               <div className="text-xs">
                 <span className="text-green-600 font-medium">Status: Completed</span>
               </div>
