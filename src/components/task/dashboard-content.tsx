@@ -1,15 +1,21 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTasksContext } from "@/components/providers/tasks-provider";
 import TasksList from "@/components/task/tasks-list";
 
 export function DashboardContent() {
-  const { upcoming, isLoading: loading } = useTasksContext();
+  const { upcoming } = useTasksContext();
+  const t = useTranslations("DashboardContent");
 
-  if (loading) {
-    return <p>Loading tasks...</p>;
-  }
-
-  return <TasksList tasks={upcoming} />;
+  return (
+    <TasksList
+      tasks={upcoming}
+      listTitle={t("listTitle")}
+      listDescription={t("listDescription")}
+      emptyTitle={t("emptyTitle")}
+      emptyDescription={t("emptyDescription")}
+    />
+  );
 }
 

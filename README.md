@@ -1,7 +1,7 @@
 # Task Manager App
 
 Современное веб-приложение для управления задачами с авторизацией, статистикой и фильтрацией.  
-Создано с использованием **Next.js 15**, **TypeScript**, **Prisma** и **Zustand**.
+Создано с использованием **Next.js 15**, **TypeScript**, **Prisma** и **Server Actions**.
 
 ---
 
@@ -13,7 +13,7 @@
 | **TypeScript** | Статическая типизация |
 | **Prisma ORM** | Работа с базой данных PostgreSQL |
 | **NextAuth.js (auth.js)** | Авторизация пользователей |
-| **Zustand** | Управление состоянием клиента |
+| **Server Actions** | Серверные мутации данных без отдельного клиентского стейт-стора |
 | **Tailwind CSS** | Стилизация и адаптивный интерфейс |
 | **shadcn/ui** | Готовые UI-компоненты |
 | **Lucide Icons** | Иконки |
@@ -49,7 +49,7 @@
 - **All Tasks** — все задачи пользователя
 
 ### Поиск
-- Поиск по заголовку и описанию задач (через Zustand store)
+- Поиск по заголовку и описанию задач
 
 ### Статистика
 - Подсчёт количества задач по статусам:
@@ -57,9 +57,9 @@
   - In Progress
   - Not Started
 
-### Кэширование
-- Все запросы к API кэшируются в Zustand (в том числе пустые результаты)
-- Повторные запросы не отправляются чаще чем раз в 2 минуты
+### Синхронизация данных
+- Операции создания, редактирования и удаления выполняются через Server Actions
+- После мутаций страницы обновляются через `revalidatePath` и `router.refresh()`
 
 ### Авторизация
 - Через **NextAuth** (`/api/auth`)
@@ -86,8 +86,8 @@ src/
 ├── lib/
 │ ├── prisma.ts # Инициализация Prisma
 │ └── utils.ts # Вспомогательные функции
-├── store/
-│ └── taskStore.ts # Zustand store
+├── app/(app)/actions/
+│ └── task-actions.ts # Server Actions для задач
 ├── types/
 │ └── ITask.ts # Тип задачи
 ├── components/
@@ -124,19 +124,20 @@ git clone https://github.com/your-username/task-manager.git
 npm install
 
 # 3. Настроить .env
-DATABASE_URL="postgresql://..."
-NEXTAUTH_SECRET="..."
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/todoapp?schema=public"
+DIRECT_URL="postgresql://postgres:postgres@localhost:5432/todoapp?schema=public"
+AUTH_SECRET="..."
 NEXTAUTH_URL="http://localhost:3000"
 AUTH_GITHUB_ID="..."
 AUTH_GITHUB_SECRET="..."
 GOOGLE_CLIENT_ID="..."
 GOOGLE_CLIENT_SECRET="..."
-# Connect supabase for storage images
-NEXT_PUBLIC_SUPABASE_URL="..."
-NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
+# Local image storage
+# Images are uploaded to /api/uploads and stored in public/uploads/tasks
 
 # 4. Синхронизировать Prisma
 npx prisma migrate dev
 
 # 5. Запустить проект
 npm run dev
+

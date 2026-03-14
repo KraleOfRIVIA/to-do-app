@@ -1,0 +1,252 @@
+{
+  "LocaleSwitcher": {
+    "toggle": "Сменить язык",
+    "en": "Английский",
+    "ru": "Русский"
+  },
+  "TopBar": {
+    "goToDashboard": "Перейти на дашборд"
+  },
+  "AppSidebar": {
+    "dashboard": "Дашборд",
+    "myTasks": "Мои задачи",
+    "settings": "Настройки",
+    "help": "Помощь",
+    "userAvatar": "Аватар пользователя",
+    "openNavigationMenu": "Открыть меню навигации",
+    "closeNavigationMenu": "Закрыть меню навигации",
+    "menu": "Меню",
+    "anonymousUser": "Пользователь"
+  },
+  "Theme": {
+    "toggle": "Переключить тему",
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "system": "Системная"
+  },
+  "Calendar": {
+    "openCalendar": "Открыть календарь"
+  },
+  "Search": {
+    "label": "Поиск задач",
+    "placeholder": "Найти задачу...",
+    "noResults": "Задачи не найдены"
+  },
+  "AuthPage": {
+    "title": "Вход",
+    "usernamePlaceholder": "Введите имя пользователя",
+    "passwordPlaceholder": "Введите пароль",
+    "rememberMe": "Запомнить меня",
+    "login": "Войти",
+    "orLoginWith": "Или войти через",
+    "noAccount": "Нет аккаунта?",
+    "createOne": "Создать",
+    "imageAlt": "Иллюстрация входа"
+  },
+  "DashboardPage": {
+    "badge": "Дашборд",
+    "title": "Сфокусируйтесь на главном на этой неделе",
+    "description": "Быстро просматривайте ближайшие задачи, распределение прогресса и недавно завершённые дела.",
+    "createTask": "Создать задачу",
+    "upcoming5Days": "Ближайшие (5 дней)",
+    "completed": "Завершено",
+    "allTasks": "Все задачи",
+    "upcomingTasks": "Ближайшие задачи",
+    "upcomingTasksDescription": "Задачи с ближайшими дедлайнами и текущим приоритетом."
+  },
+  "TasksPage": {
+    "badge": "Мои задачи",
+    "title": "Планируйте и выполняйте понятнее",
+    "description": "Держите активные задачи на виду и открывайте детали в один клик.",
+    "addTask": "Добавить задачу",
+    "allTasks": "Все задачи",
+    "active": "Активные",
+    "completed": "Завершённые",
+    "workspaceTitle": "Рабочая зона задач",
+    "workspaceDescription": "Выберите задачу в списке, чтобы открыть детали и изменить статус или приоритет."
+  },
+  "DashboardContent": {
+    "listTitle": "Скоро дедлайн",
+    "listDescription": "Задачи, запланированные на ближайшие 5 дней.",
+    "emptyTitle": "На ближайшие 5 дней дедлайнов нет",
+    "emptyDescription": "Отличный темп. Добавьте новую задачу, если хотите планировать заранее."
+  },
+  "TaskCommon": {
+    "status": {
+      "notStarted": "Не начата",
+      "inProgress": "В работе",
+      "completed": "Завершена"
+    },
+    "priority": {
+      "low": "Низкий",
+      "moderate": "Средний",
+      "high": "Высокий"
+    }
+  },
+  "AddTaskDialog": {
+    "trigger": "+ Добавить задачу",
+    "title": "Новая задача",
+    "fields": {
+      "title": "Название",
+      "date": "Дата",
+      "priority": "Приоритет",
+      "description": "Описание задачи",
+      "image": "Изображение"
+    },
+    "saving": "Сохранение...",
+    "done": "Готово",
+    "uploadFailed": "Не удалось загрузить изображение",
+    "addFailed": "Не удалось добавить задачу",
+    "addSuccess": "Задача успешно добавлена"
+  },
+  "EditTaskDialog": {
+    "trigger": "Редактировать задачу",
+    "title": "Редактирование задачи",
+    "goBack": "Назад",
+    "fields": {
+      "title": "Название",
+      "date": "Дата",
+      "priority": "Приоритет",
+      "description": "Описание задачи",
+      "descriptionPlaceholder": "Начните писать здесь...",
+      "status": "Статус"
+    },
+    "saving": "Сохранение...",
+    "done": "Готово",
+    "updateFailed": "Не удалось обновить задачу",
+    "updateSuccess": "Задача успешно обновлена"
+  },
+  "TaskActions": {
+    "confirmDelete": "Вы уверены, что хотите удалить эту задачу?",
+    "deleteFailed": "Не удалось удалить задачу",
+    "deleteSuccess": "Задача успешно удалена",
+    "openActionsFor": "Открыть действия для: {title}",
+    "editTask": "Редактировать задачу",
+    "deleting": "Удаление...",
+    "deleteTask": "Удалить задачу"
+  },
+  "TasksList": {
+    "listTitle": "Задачи",
+    "listDescription": "Откройте задачу, чтобы просмотреть детали и обновить её.",
+    "emptyTitle": "Задач пока нет",
+    "emptyDescription": "Создайте первую задачу и начните планировать работу."
+  },
+  "TaskCard": {
+    "noDate": "Без даты",
+    "noDescription": "Нет описания",
+    "priorityLabel": "Приоритет: {priority}",
+    "dueLabel": "Дедлайн: {date}",
+    "createdLabel": "Создано: {date}"
+  },
+  "TargetTask": {
+    "emptyTitle": "Выберите задачу, чтобы увидеть детали",
+    "emptyDescription": "В правой панели появятся описание, дедлайн и быстрые действия.",
+    "created": "Создано: {date}",
+    "edit": "Редактировать",
+    "priorityWithValue": "{value} приоритет",
+    "dueDate": "Дедлайн",
+    "description": "Описание",
+    "noDescription": "Нет описания",
+    "noDate": "Без даты"
+  },
+  "CompletedTasks": {
+    "title": "Завершённые",
+    "empty": "Пока нет завершённых задач.",
+    "noDescription": "Нет описания",
+    "noDueDate": "Без дедлайна",
+    "today": "сегодня",
+    "oneDayAgo": "1 день назад",
+    "daysAgo": "{days} дней назад",
+    "completedAt": "Завершено {when}."
+  },
+  "TaskStatus": {
+    "title": "Статусы задач",
+    "description": "Распределение прогресса в процентах",
+    "rows": {
+      "completed": "Завершены",
+      "inProgress": "В работе",
+      "notStarted": "Не начаты"
+    }
+  },
+  "Notifications": {
+    "openNotifications": "Открыть уведомления",
+    "title": "Уведомления",
+    "priorityLabel": "Приоритет: {priority}",
+    "empty": "Уведомлений нет",
+    "reminderTitle": "Напоминание о задаче",
+    "reminderDescription": "{title}: дедлайн в {time}",
+    "open": "Открыть"
+  },
+  "SettingsPage": {
+    "badge": "Настройки",
+    "title": "Персонализируйте рабочее пространство",
+    "description": "Управляйте данными профиля и настройте внешний вид интерфейса.",
+    "quickActions": "Профиль и предпочтения",
+    "profile": {
+      "title": "Данные профиля",
+      "description": "Обновите личные данные, которые используются в аккаунте и боковой панели.",
+      "avatarAlt": "Предпросмотр аватара профиля",
+      "avatarTitle": "Аватар",
+      "avatarHint": "Загрузите JPG, PNG, WebP, GIF или AVIF до 5 МБ.",
+      "fields": {
+        "avatar": "Аватар",
+        "nickname": "Никнейм",
+        "firstName": "Имя",
+        "lastName": "Фамилия",
+        "email": "Почта"
+      },
+      "cropper": {
+        "title": "Редактировать изображение",
+        "description": "Настройте область, которая будет видна в аватаре боковой панели.",
+        "zoom": "Масштаб",
+        "cancel": "Отмена",
+        "apply": "Применить"
+      },
+      "save": "Сохранить изменения",
+      "saving": "Сохранение..."
+    },
+    "preferences": {
+      "title": "Предпочтения",
+      "description": "Выберите язык и тему интерфейса.",
+      "language": {
+        "title": "Язык",
+        "options": {
+          "en": {
+            "title": "English",
+            "description": "Интерфейс на английском языке."
+          },
+          "ru": {
+            "title": "Русский",
+            "description": "Подписи и сообщения будут на русском."
+          }
+        }
+      },
+      "theme": {
+        "title": "Тема",
+        "options": {
+          "light": {
+            "title": "Светлая",
+            "description": "Яркий интерфейс для дневной работы."
+          },
+          "dark": {
+            "title": "Тёмная",
+            "description": "Комфортна для работы при слабом освещении."
+          },
+          "system": {
+            "title": "Системная",
+            "description": "Автоматически подстраивается под тему ОС."
+          }
+        }
+      }
+    },
+    "tips": {
+      "title": "Подсказка",
+      "description": "Сначала в навигации показывается никнейм. Если он пустой, используются имя и фамилия."
+    },
+    "toasts": {
+      "uploadFailed": "Не удалось загрузить аватар",
+      "updateFailed": "Не удалось обновить профиль",
+      "updateSuccess": "Профиль успешно обновлён"
+    }
+  }
+}
