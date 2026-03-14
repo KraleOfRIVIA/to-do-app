@@ -1,46 +1,62 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { toast } from "sonner"
-import { useTasksContext } from "@/components/providers/tasks-provider"
+import { useEffect, useMemo, useRef } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { useTasksContext } from "@/components/providers/tasks-provider";
+import { toIntlLocale } from "@/lib/i18n/locale";
+
+const ONE_MINUTE_MS = 60 * 1000;
 
 export function TaskDeadlineWatcher() {
-  const { tasks } = useTasksContext()
-  const notifiedTasksRef = useRef<Set<string>>(new Set())
+  const { tasks } = useTasksContext();
+  const locale = useLocale();
+  const t = useTranslations("Notifications");
+  const notifiedTasksRef = useRef<Set<string>>(new Set());
+  const tasksSignature = useMemo(
+    () => tasks.map((task) => `${task.id}:${task.date ?? ""}:${task.status}`).join("|"),
+    [tasks]
+  );
 
   useEffect(() => {
-    // Сбрасываем уведомления при изменении списка задач
-    notifiedTasksRef.current.clear()
-  }, [tasks.length])
+    notifiedTasksRef.current.clear();
+  }, [tasksSignature]);
 
   useEffect(() => {
-    if (tasks.length === 0) return
+    if (tasks.length === 0) {
+      return;
+    }
 
     const interval = setInterval(() => {
-      const now = new Date()
+      const now = new Date();
 
       tasks.forEach((task) => {
-        if (!task.date) return
-        
-        const taskDate = new Date(task.date as string)
-        const diff = taskDate.getTime() - now.getTime()
-
-        // Показываем уведомление только один раз для каждой задачи
-        if (diff > 0 && diff < 60 * 1000 && !notifiedTasksRef.current.has(task.id)) {
-          notifiedTasksRef.current.add(task.id)
-          toast("⏰ Task reminder", {
-            description: `${task.title} is due at ${taskDate.toLocaleTimeString()}`,
-            action: {
-              label: "Open",
-              onClick: () => console.log("Go to task", task.id),
-            },
-          })
+        if (!task.date) {
+          return;
         }
-      })
-    }, 60 * 1000)
 
-    return () => clearInterval(interval)
-  }, [tasks])
+        const taskDate = new Date(task.date);
+        const diffMs = taskDate.getTime() - now.getTime();
+        const shouldNotify = diffMs > 0 && diffMs < ONE_MINUTE_MS;
 
-  return null
+        if (shouldNotify && !notifiedTasksRef.current.has(task.id)) {
+          notifiedTasksRef.current.add(task.id);
+          toast(t("reminderTitle"), {
+            description: t("reminderDescription", {
+              title: task.title,
+              time: taskDate.toLocaleTimeString(toIntlLocale(locale)),
+            }),
+            action: {
+              label: t("open"),
+              onClick: () => console.log("Open task", task.id),
+            },
+          });
+        }
+      });
+    }, ONE_MINUTE_MS);
+
+    return () => clearInterval(interval);
+  }, [locale, t, tasks]);
+
+  return null;
 }

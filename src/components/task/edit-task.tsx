@@ -1,18 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { type ReactNode, useEffect, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useUpdateTask } from "@/hooks/useTasks";
-import Task from "@/types/ITask";
+import { updateTaskAction } from "@/app/(app)/actions/task-actions";
+import type Task from "@/types/ITask";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type EditTaskDialogProps = {
   task: Task;
+  triggerLabel?: string;
+  triggerClassName?: string;
+  triggerIcon?: ReactNode;
 };
 
 type FormData = {
@@ -23,13 +29,22 @@ type FormData = {
   status: "Not Started" | "In Progress" | "Completed";
 };
 
-export function EditTaskDialog({task}: EditTaskDialogProps) {
+export function EditTaskDialog({
+  task,
+  triggerLabel,
+  triggerClassName,
+  triggerIcon,
+}: EditTaskDialogProps) {
+  const t = useTranslations("EditTaskDialog");
+  const tTask = useTranslations("TaskCommon");
   const [open, setOpen] = useState(false);
-  const updateTaskMutation = useUpdateTask();
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const idPrefix = `task-${task.id}`;
 
   const [formData, setFormData] = useState<FormData>({
     title: task.title,
-    date: task.date || "",
+    date: task.date ? task.date.slice(0, 10) : "",
     priority: task.priority,
     description: task.description,
     status: task.status,
@@ -38,7 +53,7 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
   useEffect(() => {
     setFormData({
       title: task.title,
-      date: task.date || "",
+      date: task.date ? task.date.slice(0, 10) : "",
       priority: task.priority,
       description: task.description,
       status: task.status,
@@ -46,53 +61,57 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
   }, [task]);
 
   const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    try {
-      await updateTaskMutation.mutateAsync({
-        taskId: task.id,
-        updates: {
-          title: formData.title,
-          date: formData.date || undefined,
-          priority: formData.priority,
-          description: formData.description,
-          status: formData.status,
-        },
+    startTransition(async () => {
+      const result = await updateTaskAction({
+        id: task.id,
+        title: formData.title,
+        date: formData.date || null,
+        priority: formData.priority,
+        description: formData.description,
+        status: formData.status,
       });
+
+      if (!result.ok) {
+        toast.error(result.message ?? t("updateFailed"));
+        return;
+      }
+
       setOpen(false);
-      toast.success("Task updated successfully");
-    } catch (error) {
-      toast.error("Failed to update task");
-      console.error("Failed to update task:", error);
-    }
+      toast.success(t("updateSuccess"));
+      router.refresh();
+    });
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-            <Label className="mb-4">Edit Task</Label>
-        </DialogTrigger>
+      <DialogTrigger asChild>
+        <Button type="button" variant="ghost" className={cn("justify-start", triggerClassName)}>
+          {triggerIcon}
+          {triggerLabel ?? t("trigger")}
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-w-xl">
-        <DialogHeader className="flex justify-between items-center">
-          <DialogTitle>Edit Task</DialogTitle>
+        <DialogHeader className="flex items-center justify-between">
+          <DialogTitle>{t("title")}</DialogTitle>
           <Button
             type="button"
             variant="ghost"
             onClick={() => setOpen(false)}
             className="text-sm font-medium"
           >
-            Go Back
+            {t("goBack")}
           </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Title */}
+        <form onSubmit={handleSubmit} className="mt-2 space-y-4">
           <div>
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t("fields.title")}</Label>
             <Input
               id="title"
               name="title"
@@ -102,9 +121,8 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
             />
           </div>
 
-          {/* Date */}
           <div>
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{t("fields.date")}</Label>
             <Input
               type="date"
               id="date"
@@ -114,71 +132,82 @@ export function EditTaskDialog({task}: EditTaskDialogProps) {
             />
           </div>
 
-          {/* Priority */}
           <div>
-            <Label>Priority</Label>
+            <Label>{t("fields.priority")}</Label>
             <RadioGroup
               name="priority"
               value={formData.priority}
-              onValueChange={(val) => updateField("priority", val as "Low" | "Moderate" | "High")}
-              className="flex gap-6 mt-2"
+              onValueChange={(value) =>
+                updateField("priority", value as "Low" | "Moderate" | "High")
+              }
+              className="mt-2 flex gap-6"
             >
               <div className="flex items-center gap-1">
-                <span className="text-green-500 text-xs">●</span>
-                <RadioGroupItem value="Low" id="low" />
-                <Label htmlFor="low" className="ml-1">Low</Label>
+                <RadioGroupItem value="Low" id={`${idPrefix}-low`} />
+                <Label htmlFor={`${idPrefix}-low`} className="ml-1">
+                  {tTask("priority.low")}
+                </Label>
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-blue-500 text-xs">●</span>
-                <RadioGroupItem value="Moderate" id="moderate" />
-                <Label htmlFor="moderate" className="ml-1">Moderate</Label>
+                <RadioGroupItem value="Moderate" id={`${idPrefix}-moderate`} />
+                <Label htmlFor={`${idPrefix}-moderate`} className="ml-1">
+                  {tTask("priority.moderate")}
+                </Label>
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-red-500 text-xs">●</span>
-                <RadioGroupItem value="High" id="high" />
-                <Label htmlFor="high" className="ml-1">High</Label>
+                <RadioGroupItem value="High" id={`${idPrefix}-high`} />
+                <Label htmlFor={`${idPrefix}-high`} className="ml-1">
+                  {tTask("priority.high")}
+                </Label>
               </div>
             </RadioGroup>
           </div>
 
-          {/* Description */}
           <div>
-            <Label htmlFor="description">Task Description</Label>
+            <Label htmlFor="description">{t("fields.description")}</Label>
             <Textarea
               id="description"
               name="description"
               rows={4}
               value={formData.description || ""}
               onChange={(e) => updateField("description", e.target.value)}
-              placeholder="Start writing here..."
+              placeholder={t("fields.descriptionPlaceholder")}
             />
           </div>
-          {/** Status */}
+
           <div>
-            <Label>Status</Label>
+            <Label>{t("fields.status")}</Label>
             <RadioGroup
               name="status"
               value={formData.status}
-              className="flex gap-6 mt-2"
-              onValueChange={(val) => updateField("status", val as "Not Started" | "In Progress" | "Completed")}
+              className="mt-2 flex gap-6"
+              onValueChange={(value) =>
+                updateField("status", value as "Not Started" | "In Progress" | "Completed")
+              }
             >
               <div className="flex items-center gap-1">
-                <RadioGroupItem value="Not Started" id="not-started" />
-                <Label htmlFor="not-started" className="ml-1">Not Started</Label>
+                <RadioGroupItem value="Not Started" id={`${idPrefix}-not-started`} />
+                <Label htmlFor={`${idPrefix}-not-started`} className="ml-1">
+                  {tTask("status.notStarted")}
+                </Label>
               </div>
               <div className="flex items-center gap-1">
-                <RadioGroupItem value="In Progress" id="in-progress" />
-                <Label htmlFor="in-progress" className="ml-1">In Progress</Label>
+                <RadioGroupItem value="In Progress" id={`${idPrefix}-in-progress`} />
+                <Label htmlFor={`${idPrefix}-in-progress`} className="ml-1">
+                  {tTask("status.inProgress")}
+                </Label>
               </div>
               <div className="flex items-center gap-1">
-                <RadioGroupItem value="Completed" id="completed" />
-                <Label htmlFor="completed" className="ml-1">Completed</Label>
+                <RadioGroupItem value="Completed" id={`${idPrefix}-completed`} />
+                <Label htmlFor={`${idPrefix}-completed`} className="ml-1">
+                  {tTask("status.completed")}
+                </Label>
               </div>
             </RadioGroup>
           </div>
 
-          <Button type="submit" className="w-full" disabled={updateTaskMutation.isPending}>
-            {updateTaskMutation.isPending ? "Saving..." : "Done"}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? t("saving") : t("done")}
           </Button>
         </form>
       </DialogContent>

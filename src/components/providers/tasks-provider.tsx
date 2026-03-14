@@ -1,32 +1,46 @@
 "use client";
 
-import { useTasks, useUpcomingTasks } from "@/hooks/useTasks";
-import { createContext, useContext, ReactNode } from "react";
-import Task from "@/types/ITask";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import type Task from "@/types/ITask";
 
 type TasksContextType = {
   tasks: Task[];
   upcoming: Task[];
-  isLoading: boolean;
+};
+
+type TasksProviderProps = {
+  children: ReactNode;
+  initialTasks: Task[];
+  initialUpcoming: Task[];
 };
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
 
-export function TasksProvider({ children }: { children: ReactNode }) {
-  const { data: tasks = [], isLoading: tasksLoading } = useTasks();
-  const { data: upcoming = [], isLoading: upcomingLoading } = useUpcomingTasks();
+export function TasksProvider({
+  children,
+  initialTasks,
+  initialUpcoming,
+}: TasksProviderProps) {
+  const [tasks, setTasks] = useState(initialTasks);
+  const [upcoming, setUpcoming] = useState(initialUpcoming);
 
-  return (
-    <TasksContext.Provider
-      value={{
-        tasks,
-        upcoming,
-        isLoading: tasksLoading || upcomingLoading,
-      }}
-    >
-      {children}
-    </TasksContext.Provider>
+  useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
+
+  useEffect(() => {
+    setUpcoming(initialUpcoming);
+  }, [initialUpcoming]);
+
+  const value = useMemo(
+    () => ({
+      tasks,
+      upcoming,
+    }),
+    [tasks, upcoming]
   );
+
+  return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
 }
 
 export function useTasksContext() {
@@ -36,4 +50,3 @@ export function useTasksContext() {
   }
   return context;
 }
-

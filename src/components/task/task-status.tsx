@@ -1,108 +1,67 @@
-import { FaRegClipboard } from "react-icons/fa";
+import { ChartNoAxesCombined } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface TaskStatusStatsProps {
-  completed: number;      // процент (0-100)
-  inProgress: number;     // процент (0-100)
-  notStarted: number;     // процент (0-100)
+  completed: number;
+  inProgress: number;
+  notStarted: number;
 }
 
-const statusData = [
+const rows = [
   {
-    label: "Completed",
-    color: "text-green-600",
-    ring: "stroke-green-600",
-    dot: "bg-green-600",
+    key: "completed",
+    labelKey: "completed",
+    barClass: "bg-emerald-500",
+    textClass: "text-emerald-700 dark:text-emerald-300",
   },
   {
-    label: "In Progress",
-    color: "text-blue-600",
-    ring: "stroke-blue-600",
-    dot: "bg-blue-600",
+    key: "inProgress",
+    labelKey: "inProgress",
+    barClass: "bg-blue-500",
+    textClass: "text-blue-700 dark:text-blue-300",
   },
   {
-    label: "Not Started",
-    color: "text-red-500",
-    ring: "stroke-red-500",
-    dot: "bg-red-500",
+    key: "notStarted",
+    labelKey: "notStarted",
+    barClass: "bg-rose-500",
+    textClass: "text-rose-700 dark:text-rose-300",
   },
-];
+] as const;
 
-function getCircle(percent: number, color: string) {
-  const r = 28;
-  const circ = 2 * Math.PI * r;
-  const dash = (percent / 100) * circ;
+export function TaskStatusStats({ completed, inProgress, notStarted }: TaskStatusStatsProps) {
+  const t = useTranslations("TaskStatus");
+  const values = { completed, inProgress, notStarted };
 
   return (
-    <svg
-      viewBox="0 0 64 64"
-      className="block w-full h-full"
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <circle
-        cx={32}
-        cy={32}
-        r={28}
-        fill="none"
-        stroke="#e5e7eb"
-        strokeWidth={7}
-      />
-      <circle
-        cx={32}
-        cy={32}
-        r={28}
-        fill="none"
-        strokeWidth={7}
-        strokeLinecap="round"
-        strokeDasharray={`${dash} ${circ - dash}`}
-        strokeDashoffset={circ * 0.25}
-        className={color}
-      />
-    </svg>
-  );
-}
+    <section className="rounded-2xl border bg-card p-5 shadow-sm">
+      <header className="mb-5 flex items-center gap-2">
+        <ChartNoAxesCombined className="size-4 text-muted-foreground" />
+        <div>
+          <h3 className="text-base font-semibold">{t("title")}</h3>
+          <p className="text-sm text-muted-foreground">{t("description")}</p>
+        </div>
+      </header>
 
-export function TaskStatusStats({
-  completed,
-  inProgress,
-  notStarted,
-}: TaskStatusStatsProps) {
-  const stats = [
-    { value: completed, ...statusData[0] },
-    { value: inProgress, ...statusData[1] },
-    { value: notStarted, ...statusData[2] },
-  ];
-
-  return (
-    <div className="bg-card rounded-xl shadow p-5 overflow-hidden">
-      {/* Заголовок */}
-      <div className="flex items-center gap-2 mb-4">
-        <FaRegClipboard className="text-gray-400" />
-        <span className="text-sm font-medium text-red-400">Task Status</span>
-      </div>
-
-      {/* Контейнер диаграмм */}
-      <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="flex flex-col items-center w-20 sm:w-24 md:w-28"
-          >
-            {/* Диаграмма */}
-            <div className="relative w-full aspect-square max-w-[72px]">
-              {getCircle(stat.value, stat.ring)}
-              <span className="absolute inset-0 flex items-center justify-center font-semibold text-sm sm:text-base">
-                {stat.value}%
-              </span>
+      <div className="space-y-4">
+        {rows.map((row) => {
+          const value = values[row.key];
+          return (
+            <div key={row.key} className="space-y-1.5">
+              <div className="flex items-center justify-between text-sm">
+                <span className={cn("font-medium", row.textClass)}>{t(`rows.${row.labelKey}`)}</span>
+                <span className="font-semibold">{value}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-muted/40">
+                <div
+                  className={cn("h-full rounded-full transition-all", row.barClass)}
+                  style={{ width: `${value}%` }}
+                />
+              </div>
             </div>
-
-            {/* Подпись */}
-            <div className="flex items-center gap-1 mt-2 text-xs sm:text-sm text-center">
-              <span className={`w-2 h-2 rounded-full ${stat.dot}`} />
-              <span className={stat.color}>{stat.label}</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-    </div>
+    </section>
   );
 }

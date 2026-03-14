@@ -1,100 +1,118 @@
+import Image from "next/image";
+import { CalendarDays } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import Task from "@/types/ITask";
 import { CebabButton } from "./cebab-button";
-import { TaskView } from "./task-view";
+import { toIntlLocale } from "@/lib/i18n/locale";
+import { getPriorityKey, getStatusKey } from "@/lib/tasks/task-i18n";
+
 type TaskCardProps = {
   task: Task;
-  onClick?: () => void;
+  isActive?: boolean;
+  onSelect?: () => void;
 };
 
-const statusColors = {
-  "Not Started": "text-red-500",
-  "In Progress": "text-blue-500",
-  "Completed": "text-green-500",
+const statusStyles = {
+  "Not Started": {
+    dot: "bg-rose-500",
+    badge: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
+  },
+  "In Progress": {
+    dot: "bg-blue-500",
+    badge: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+  },
+  Completed: {
+    dot: "bg-emerald-500",
+    badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  },
 } as const;
 
-const priorityColors = {
-  Low: "text-gray-500",
-  Moderate: "text-blue-400",
-  High: "text-orange-500",
-  Extreme: "text-red-600 font-bold",
+const priorityStyles = {
+  Low: "bg-zinc-500/10 text-zinc-700 dark:text-zinc-300",
+  Moderate: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  High: "bg-orange-500/10 text-orange-700 dark:text-orange-300",
 } as const;
 
-export function TaskCard({ task,onClick}: TaskCardProps) {
-  // ✅ Деструктурируем поля из задачи
-  const { title, description, priority, status, createdAt, image } = task;
+function formatDate(value: string | null | undefined, locale: string, noDateLabel: string) {
+  if (!value) {
+    return noDateLabel;
+  }
 
-  const formattedDate = createdAt
-    ? new Intl.DateTimeFormat("ru-RU", {
-        weekday: "long",
-        day: "numeric",
-        month: "numeric",
-        year: "numeric",
-      }).format(new Date(createdAt))
-    : "—";
+  return new Intl.DateTimeFormat(toIntlLocale(locale), {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+export function TaskCard({ task, isActive = false, onSelect }: TaskCardProps) {
+  const t = useTranslations("TaskCard");
+  const tTask = useTranslations("TaskCommon");
+  const locale = useLocale();
+  const createdAtLabel = formatDate(task.createdAt, locale, t("noDate"));
+  const dueDateLabel = formatDate(task.date, locale, t("noDate"));
+  const statusStyle = statusStyles[task.status];
 
   return (
     <Card
       className={cn(
-        "p-3 rounded-xl shadow-md transition border cursor-pointer bg-card hover:shadow-lg border-border"
+        "gap-0 overflow-hidden border bg-card py-0 transition-all",
+        isActive
+          ? "border-primary/70 ring-1 ring-primary/30"
+          : "hover:border-primary/35 hover:shadow-sm"
       )}
-      onClick={onClick}
     >
-      <CardContent className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-0">
-        {/* Индикатор статуса */}
-        <div className="flex flex-row sm:flex-col items-center gap-2 pt-1">
-          <span
-            className={cn(
-              "inline-block w-3 h-3 rounded-full border-2 border-current",
-              statusColors[status as keyof typeof statusColors]
-            )}
-            title={status}
+      <CardContent className="flex items-start gap-3 px-4 py-4">
+        <button
+          type="button"
+          className="flex min-w-0 flex-1 items-start gap-3 text-left"
+          onClick={onSelect}
+          aria-pressed={isActive}
+        >
+          <span className={cn("mt-1.5 size-2.5 shrink-0 rounded-full", statusStyle.dot)} />
+
+          <span className="min-w-0 flex-1 space-y-2">
+            <span className="line-clamp-1 block text-sm font-semibold">{task.title}</span>
+
+            <span className="line-clamp-2 block text-sm text-muted-foreground">
+              {task.description || t("noDescription")}
+            </span>
+
+            <span className="flex flex-wrap items-center gap-2 text-xs">
+              <span className={cn("rounded-full px-2 py-1 font-medium", priorityStyles[task.priority])}>
+                {t("priorityLabel", {
+                  priority: tTask(`priority.${getPriorityKey(task.priority)}`),
+                })}
+              </span>
+              <span className={cn("rounded-full px-2 py-1 font-medium", statusStyle.badge)}>
+                {tTask(`status.${getStatusKey(task.status)}`)}
+              </span>
+              <span className="inline-flex items-center gap-1 text-muted-foreground">
+                <CalendarDays className="size-3.5" />
+                {t("dueLabel", { date: dueDateLabel })}
+              </span>
+            </span>
+            <span className="block text-xs text-muted-foreground">
+              {t("createdLabel", { date: createdAtLabel })}
+            </span>
+          </span>
+        </button>
+
+        {task.image ? (
+          <Image
+            src={task.image}
+            alt={task.title}
+            width={64}
+            height={64}
+            className="hidden h-16 w-16 rounded-lg border object-cover sm:block"
           />
+        ) : null}
+
+        <div className="shrink-0">
+          <CebabButton task={task} />
         </div>
-
-        {/* Контент */}
-        <div className="flex-1 min-w-0">
-          <TaskView task={task} />
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-            {description || "No description"}
-          </p>
-
-          <div className="flex flex-wrap gap-2 text-xs items-center">
-            <span
-              className={cn(
-                priorityColors[priority as keyof typeof priorityColors],
-                "font-medium"
-              )}
-            >
-              Priority: {priority}
-            </span>
-            <span
-              className={cn(
-                statusColors[status as keyof typeof statusColors],
-                "font-medium"
-              )}
-            >
-              Status: {status}
-            </span>
-            <span className="text-gray-400">{formattedDate}</span>
-          </div>
-        </div>
-
-        {/* Картинка */}
-        {image && (
-          <div className="flex-shrink-0 sm:ml-2 w-full sm:w-auto">
-            <Image
-              src={image}
-              alt={title}
-              className="rounded-lg object-cover w-full sm:w-[64px] h-[120px] sm:h-[64px]"
-              width={64}
-              height={64}
-            />
-          </div>
-        )}
-        <CebabButton task={task}/>
       </CardContent>
     </Card>
   );

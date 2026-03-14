@@ -1,84 +1,110 @@
-import React from "react";
 import Image from "next/image";
-import  Task  from "@/types/ITask";
+import { CalendarDays, CircleCheckBig, Flag, PencilLine } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import Task from "@/types/ITask";
 import { EditTaskDialog } from "./edit-task";
+import { cn } from "@/lib/utils";
+import { toIntlLocale } from "@/lib/i18n/locale";
+import { getPriorityKey, getStatusKey } from "@/lib/tasks/task-i18n";
 
 type TaskFullCardProps = {
   task: Task | null;
 };
 
-export const TargetTask: React.FC<TaskFullCardProps> = ({ task }) => (
-  <div className="bg-background rounded-xl shadow p-6 border h-full w-full flex flex-col">
-    {task ? (
-      <>
-        {task.image && (
-          <div className="mb-4">
-            <Image
-              src={task.image}
-              alt={task.title}
-              width={400}
-              height={120}
-              className="rounded-lg object-cover w-full h-32"
-            />
-          </div>
-        )}
+const statusStyles = {
+  "Not Started": "bg-rose-500/10 text-rose-700 dark:text-rose-300",
+  "In Progress": "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+  Completed: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+} as const;
 
-        <h2 className="text-xl font-bold mb-2">{task.title}</h2>
+const priorityStyles = {
+  Low: "bg-zinc-500/10 text-zinc-700 dark:text-zinc-300",
+  Moderate: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  High: "bg-orange-500/10 text-orange-700 dark:text-orange-300",
+} as const;
 
-        <div className="mb-2">
-          <span className="font-semibold">Priority:</span>{" "}
-          <span
-            className={
-              task.priority === "High"
-                ? "text-red-600 font-bold"
-                : task.priority === "Moderate"
-                ? "text-yellow-600"
-                : "text-green-600"
-            }
-          >
-            {task.priority}
-          </span>
-        </div>
+function formatDate(value: string | null, locale: string, noDateLabel: string) {
+  if (!value) {
+    return noDateLabel;
+  }
 
-        <div className="mb-2">
-          <span className="font-semibold">Status:</span>{" "}
-          <span
-            className={
-              task.status === "Not Started"
-                ? "text-red-500"
-                : task.status === "In Progress"
-                ? "text-yellow-500"
-                : "text-green-500"
-            }
-          >
-            {task.status}
-          </span>
-        </div>
+  return new Intl.DateTimeFormat(toIntlLocale(locale), {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(value));
+}
 
-        <div className="mb-2 text-sm text-gray-500">
-          Created on: {task.createdAt}
-        </div>
+export default function TargetTask({ task }: TaskFullCardProps) {
+  const t = useTranslations("TargetTask");
+  const tTask = useTranslations("TaskCommon");
+  const locale = useLocale();
 
-        {task.date && (
-          <div className="mb-2 text-sm text-gray-500">
-            Deadline: {new Date(task.date).toLocaleDateString("ru-RU")}
-          </div>
-        )}
-
-        <div className="mb-2">
-          <span className="font-semibold">Task Description:</span>
-          <div className="mt-1">{task.description || "No description"}</div>
-        </div>
-        <div className="">
-          <EditTaskDialog task={task}/>
-        </div>
-      </>
-    ) : (
-      <div className="flex flex-col items-center justify-center h-full text-gray-400">
-        <p>Select a task to view details</p>
+  if (!task) {
+    return (
+      <div className="flex min-h-[340px] flex-col items-center justify-center rounded-xl border border-dashed bg-background/60 px-6 text-center">
+        <CircleCheckBig className="mb-3 size-6 text-muted-foreground" />
+        <p className="text-sm font-medium">{t("emptyTitle")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t("emptyDescription")}
+        </p>
       </div>
-    )}
-  </div>
-);
+    );
+  }
 
-export default TargetTask;
+  return (
+    <article className="overflow-hidden rounded-xl border bg-background/60">
+      {task.image ? (
+        <Image
+          src={task.image}
+          alt={task.title}
+          width={640}
+          height={220}
+          className="h-40 w-full border-b object-cover"
+        />
+      ) : null}
+
+      <div className="space-y-4 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold leading-tight">{task.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("created", { date: formatDate(task.createdAt, locale, t("noDate")) })}
+            </p>
+          </div>
+          <EditTaskDialog
+            task={task}
+            triggerLabel={t("edit")}
+            triggerClassName="h-8 px-3 text-xs"
+            triggerIcon={<PencilLine className="size-3.5" />}
+          />
+        </div>
+
+        <div className="flex flex-wrap gap-2 text-xs font-medium">
+          <span className={cn("rounded-full px-2 py-1", priorityStyles[task.priority])}>
+            <Flag className="mr-1 inline size-3.5" />
+            {t("priorityWithValue", { value: tTask(`priority.${getPriorityKey(task.priority)}`) })}
+          </span>
+          <span className={cn("rounded-full px-2 py-1", statusStyles[task.status])}>
+            {tTask(`status.${getStatusKey(task.status)}`)}
+          </span>
+        </div>
+
+        <div className="rounded-lg border bg-card px-3 py-2 text-sm">
+          <p className="text-muted-foreground">{t("dueDate")}</p>
+          <p className="mt-1 inline-flex items-center gap-1.5 font-medium">
+            <CalendarDays className="size-4 text-muted-foreground" />
+            {formatDate(task.date, locale, t("noDate"))}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-sm font-medium">{t("description")}</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            {task.description || t("noDescription")}
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+}

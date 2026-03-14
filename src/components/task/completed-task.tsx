@@ -1,64 +1,78 @@
-import { FaCheckSquare } from "react-icons/fa";
 import Image from "next/image";
+import { CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Task from "@/types/ITask";
-
-function formatCompletedAgo(date: string | null) {
-  if (!date) return "unknown date"
-
-  const now = new Date()
-  const diffMs = now.getTime() - new Date(date).getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) return "today"
-  if (diffDays === 1) return "1 day ago"
-  return `${diffDays} days ago`
-}
 
 interface CompletedTasksProps {
   tasks: Task[];
-  
+}
+
+function formatRelativeDate(
+  value: string | null,
+  t: (key: string, values?: Record<string, string | number | Date>) => string
+) {
+  if (!value) {
+    return t("noDueDate");
+  }
+
+  const now = new Date();
+  const target = new Date(value);
+  const diffMs = now.getTime() - target.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 0) return t("today");
+  if (diffDays === 1) return t("oneDayAgo");
+  return t("daysAgo", { days: diffDays });
 }
 
 export function CompletedTasks({ tasks }: CompletedTasksProps) {
+  const t = useTranslations("CompletedTasks");
+
   return (
-    <div className="bg-card rounded-xl shadow p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <FaCheckSquare className="text-gray-400" />
-        <span className="text-base font-medium text-red-400">Completed Task</span>
-      </div>
-      <div className="flex flex-col gap-4">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="flex items-center border border-gray-200 rounded-xl p-4 bg-card"
-          >
-            {/* Статусный кружок */}
-            <span className="w-4 h-4 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
-              <span className="w-2 h-2 bg-green-500 rounded-full" />
-            </span>
-            {/* Контент */}
-            <div className="flex-1 min-w-0">
-              <div className="font-semibold text-lg mb-1">{task.title}</div>
-              <div className="text-sm text-gray-500 mb-2">{task.description || "No description"}</div>
-              <div className="text-xs">
-                <span className="text-green-600 font-medium">Status: Completed</span>
+    <section className="rounded-2xl border bg-card p-5 shadow-sm">
+      <header className="mb-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="size-4 text-emerald-500" />
+          <h3 className="text-base font-semibold">{t("title")}</h3>
+        </div>
+        <span className="rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
+          {tasks.length}
+        </span>
+      </header>
+
+      {tasks.length === 0 ? (
+        <div className="rounded-xl border border-dashed bg-background/60 px-4 py-8 text-center text-sm text-muted-foreground">
+          {t("empty")}
+        </div>
+      ) : (
+        <ul className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
+          {tasks.map((task) => (
+            <li key={task.id} className="rounded-xl border bg-background/50 p-3">
+              <div className="flex items-start gap-3">
+                {task.image ? (
+                  <Image
+                    src={task.image}
+                    alt={task.title}
+                    width={52}
+                    height={52}
+                    className="h-12 w-12 rounded-md border object-cover"
+                  />
+                ) : null}
+
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-1 text-sm font-semibold">{task.title}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    {task.description || t("noDescription")}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {t("completedAt", { when: formatRelativeDate(task.date, t) })}
+                  </p>
+                </div>
               </div>
-              <div className="text-xs text-gray-400">Completed {formatCompletedAgo(task.date ?? null)}.</div>
-            </div>
-            {/* Картинка */}
-            <div className="ml-3 flex-shrink-0">
-              {task.image && (
-                <Image
-                  src={task.image}
-                  alt={task.title}
-                  width={64}
-                  height={64}
-                />
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

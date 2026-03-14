@@ -1,52 +1,87 @@
 "use client";
-import { useDebounce } from "@/hooks/useDebounce";
-import { Search } from "lucide-react";
-import { useMemo, useState } from "react";
+
 import Link from "next/link";
+import { Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useDebounce } from "@/hooks/useDebounce";
+import { Input } from "@/components/ui/input";
 import { useTasksContext } from "@/components/providers/tasks-provider";
+
+const MAX_RESULTS = 8;
+const SEARCH_ID = "topbar-task-search";
 
 export default function SearchTask() {
   const { tasks } = useTasksContext();
+  const t = useTranslations("Search");
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debouncedQuery = useDebounce(query, 300);
 
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const filteredTasks = useMemo(() => {
-    if (!debouncedQuery.trim()) {
-      return tasks;
+    const normalizedQuery = debouncedQuery.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return tasks.slice(0, MAX_RESULTS);
     }
 
-    return tasks.filter(
-      (t) =>
-        t.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        t.description?.toLowerCase().includes(debouncedQuery.toLowerCase())
-    );
+    return tasks
+      .filter((task) => {
+        const titleMatch = task.title.toLowerCase().includes(normalizedQuery);
+        const descriptionMatch = task.description?.toLowerCase().includes(normalizedQuery);
+
+        return titleMatch || descriptionMatch;
+      })
+      .slice(0, MAX_RESULTS);
   }, [debouncedQuery, tasks]);
 
+  const showResults = isFocused && query.trim().length > 0;
+  const hasResults = filteredTasks.length > 0;
+
   return (
-    <div className="relative w-full max-w-[400px]">
-      {/* Поисковое поле */}
-      <div className="flex items-center bg-white dark:bg-gray-900 rounded-xl shadow px-3 h-10">
-        <input
-          type="text"
-          placeholder="Search tasks..."
+    <div className="relative w-full">
+      <label htmlFor={SEARCH_ID} className="sr-only">
+        {t("label")}
+      </label>
+
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          id={SEARCH_ID}
+          type="search"
+          autoComplete="off"
+          placeholder={t("placeholder")}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(event) => setQuery(event.target.value)}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 150)} // чтобы успел клик по варианту
-          className="flex-1 bg-transparent border-none outline-none text-sm px-2"
+          onBlur={() => {
+            hideTimeoutRef.current = setTimeout(() => setIsFocused(false), 150);
+          }}
+          aria-expanded={showResults}
+          aria-controls={`${SEARCH_ID}-results`}
+          className="h-10 rounded-xl bg-background pl-9 pr-3 shadow-sm"
         />
-        <Search className="text-foreground" size={18} />
       </div>
 
-      {/* Выпадающий список результатов */}
-      {isFocused && query.trim() && filteredTasks.length > 0 && (
-        <ul className="absolute z-50 top-12 left-0 right-0 bg-card border border-border rounded-lg shadow-lg max-h-[250px] overflow-y-auto">
+      {showResults && hasResults ? (
+        <ul
+          id={`${SEARCH_ID}-results`}
+          role="listbox"
+          className="absolute left-0 right-0 top-12 z-50 max-h-[250px] overflow-y-auto rounded-xl border border-border bg-card p-1 shadow-lg"
+        >
           {filteredTasks.map((task) => (
             <li key={task.id}>
               <Link
-                href={`/tasks/${task.id}`}
-                className="block px-4 py-2 hover:bg-muted text-sm truncate"
+                href="/tasks"
+                className="block truncate rounded-lg px-3 py-2 text-sm hover:bg-muted"
                 onClick={() => {
                   setQuery("");
                   setIsFocused(false);
@@ -57,14 +92,13 @@ export default function SearchTask() {
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
 
-      {/* Если ничего не найдено */}
-      {isFocused && query.trim() && filteredTasks.length === 0 && (
-        <div className="absolute z-50 top-12 left-0 right-0 bg-card border border-border rounded-lg shadow-lg px-4 py-2 text-sm text-muted-foreground">
-          No tasks found
+      {showResults && !hasResults ? (
+        <div className="absolute left-0 right-0 top-12 z-50 rounded-xl border border-border bg-card px-4 py-2 text-sm text-muted-foreground shadow-lg">
+          {t("noResults")}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

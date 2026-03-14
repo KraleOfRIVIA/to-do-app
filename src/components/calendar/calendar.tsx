@@ -1,68 +1,45 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { CalendarDays } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import * as React from "react";
+import { CalendarDays } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toIntlLocale } from "@/lib/i18n/locale";
 
 export function Calendar02() {
-  const [open, setOpen] = React.useState(false)
+  const t = useTranslations("Calendar");
+  const locale = useLocale();
+  const [open, setOpen] = React.useState(false);
+  const today = React.useMemo(() => new Date(), []);
 
-  // ✅ текущая дата
-  const today = new Date()
-
-  // ✅ мок даты (события)
-  const highlightedDates = [
-    new Date(2025, 8, 5),
-    new Date(2025, 8, 10),
-    new Date(2025, 8, 15),
-  ]
-
-  // ✅ формат даты: День недели + dd.MM.yyyy
-  const formattedDate = new Intl.DateTimeFormat("ru-RU", {
-    weekday: "long",
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-  }).format(today)
+  const formattedDate = new Intl.DateTimeFormat(toIntlLocale(locale), {
+    weekday: "short",
+    day: "2-digit",
+    month: "long",
+  }).format(today);
 
   return (
-    <div className="flex items-center gap-3">
-      {/* Текущая дата */}
-
-      {/* Кнопка-календарь */}
+    <div className="flex items-center gap-2">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            type="button"
             variant="outline"
-            id="date-picker"
-            className="w-10 justify-center font-normal bg-primary hover:bg-background text-background hover:text-primary p-0"
+            size="icon"
+            aria-label={t("openCalendar")}
+            className="h-9 w-9 rounded-xl bg-background/80"
           >
-            <CalendarDays />
+            <CalendarDays className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-background" align="start">
-          <Calendar
-            mode="single"
-            selected={today} // выделяем сегодняшнюю дату
-            modifiers={{
-              highlight: highlightedDates, // подсвечиваем кастомные даты
-            }}
-            modifiersClassNames={{
-              highlight:
-                "bg-primary text-primary-foreground rounded-full", // стиль событий
-            }}
-          />
+        <PopoverContent className="w-auto p-0 bg-background" align="end">
+          <Calendar mode="single" selected={today} defaultMonth={today} />
         </PopoverContent>
       </Popover>
-      <span className="text-sm font-medium text-foreground capitalize">
-        {formattedDate}
-      </span>
+
+      <span className="hidden text-sm font-medium capitalize text-foreground xl:inline">{formattedDate}</span>
     </div>
-  )
+  );
 }
